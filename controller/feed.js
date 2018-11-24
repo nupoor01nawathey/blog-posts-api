@@ -1,54 +1,44 @@
-const { validationResult } = require('express-validator/check');
-
-const Post = require('../models/post');
+const _    = require('lodash'),
+      Post = require('../models/post'),
+      User = require('../models/user');
 
 exports.getPosts = (req, res, next) => {
-    let post = {
-        author: 'Nupoor',
-        title: 'First Post',
-        content: 'This is the first post!',
-        createdAt: new Date().toISOString()
-    };
-    res.status(201).json({
-        message: 'Post created successfully',
-        post: {
-            post
-        }
-    })
-}
-
-exports.postPost = (req, res, next) => {
-    const title   = req.body.title,
-          content = req.body.content;
-
-    // const errors = validationResult(req);
-    // console.log(errors);
-    // if(!errors.isEmpty()) {
-    //     return res.status(422).json({
-    //         message: 'Validation Error',
-    //         errors: errors.array(),
-    //         customMessage: 'Please check the length of either title or content!'
-    //     })
-    // }
-
-    console.log(req.file);
-    
-    const post = new Post({
-            title: title,
-            content: content,
-            creator: 'Nupoor',
-            imageUrl: req.file.destination + req.file.filename
-    });
-    post.save()
-    .then(result => {
-        console.log(result);
+    Post.find()
+    .then(allPosts => {   
         res.status(201).json({
             message: 'Post created successfully',
-            post: result
+            post: {
+                allPosts
+            }
         });
     })
     .catch(err => console.log(err));
 }
+
+exports.postPost = (req, res, next) => {
+    const {title, content} = _.pick(req.body, ['title', 'content']);
+    const post = new Post({
+            title: title,
+            content: content,
+            creator: req.userData.email,
+            imageUrl: req.file.destination + req.file.filename
+    });
+    User.findOneAndUpdate({ email: req.userData.email }, {$push: { post: post }})
+    .then(() => {
+        post.save()
+        .then(result => {
+            console.log(result);
+            res.status(201).json({
+                message: 'Post created successfully',
+                post: result
+            });
+        })
+        .catch(err => console.log(err));
+    })
+    .catch(err => console.log(err)); 
+}
+
+
 
 exports.getSinglePost = (req, res, next) => {
     const postId = req.params.postId;
