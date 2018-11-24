@@ -76,7 +76,7 @@ exports.postLogin = (req, res) => {
                 email: email,
                 userId: user._id
             }, 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9', {expiresIn: '24h'});
-            
+    
             return res.status(201).json({
                 token: token,
                 message: 'Auth Successful, token valid for 24hr'

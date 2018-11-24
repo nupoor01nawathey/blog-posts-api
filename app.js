@@ -30,14 +30,24 @@ app.get('/', (req, res, next) => {
 app.use('/feed', feedRoutes);
 app.use('/user', authRoutes);
 
+
+const PORT = process.env.PORT || 8080;
+
+let server;
+
 mongoose.connect('mongodb://localhost:27017/BlogPostsRestAPI', { useNewUrlParser: true })
 .then(() => {
     console.log('connected to the database');
-    app.listen(3000, () => {
+    server = app.listen(PORT, () => {
         console.log('Server started at 3000');
     });
 })
 .catch(err => console.log(err));
 
 
+//server.listen(80);
 
+module.exports = {
+    app,
+    server
+};

@@ -3,9 +3,8 @@ const express  = require('express'),
 
 const router  = express.Router();
 
-const { check } = require('express-validator/check');
-
-const feedController = require('../controller/feed');
+const checkAuth = require('../middleware/checkAuth'),
+      feedController = require('../controller/feed');
 
 
 // multer setup
@@ -42,20 +41,12 @@ const uploads = multer({
 // /feed/posts
 router.get('/posts', feedController.getPosts);
 
-router.post('/post', 
-        // check('title')
-        //     .trim()
-        //     .isLength({ min: 3}),
-        // check('content')
-        //     .trim()
-        //     .isLength({ min: 10 }),
-            uploads.single('image'),
-        feedController.postPost);
+router.post('/post', checkAuth, uploads.single('image'), feedController.postPost);
 
 router.get('/post/:postId', feedController.getSinglePost);
 
-router.put('/post/:postId', feedController.putSinglePost);
+router.put('/post/:postId', checkAuth, feedController.putSinglePost);
 
-router.delete('/post/:postId', feedController.deletePost);
+router.delete('/post/:postId', checkAuth, feedController.deletePost);
 
 module.exports = router;
